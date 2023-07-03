@@ -1,0 +1,54 @@
+package AdminProgram;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
+
+public class AdminAccessor {
+	File file = new File("Administrator.txt");
+	
+	public Boolean LoadFile(String filePath) {
+		String ID = "", PW = "", tempStr = "";
+		
+		try {
+			Scanner scan = new Scanner(file);
+			while(scan.hasNextLine()) {
+				Admin data = new Admin();
+				ID = scan.nextLine();
+				data.id = ID;
+				PW = scan.nextLine();
+				data.pw = PW;
+				break;
+			}
+			scan.close();			
+			return true;		
+		} catch (FileNotFoundException e) {
+			try {
+				System.out.println("관리자 데이터 파일이 존재하지 않거나 손상되었습니다.");
+				
+				file.createNewFile();
+				FileWriter write = new FileWriter(file);
+				tempStr += ID;
+				tempStr += PW;
+				write.write("");
+				write.flush();
+				write.close();
+				
+				System.out.println("관리자 데이터 파일이 생성되었습니다.");
+				return true;
+			} catch (IOException e1) { //이럴 경우가 없으므로 넘어가세요.
+				System.out.println("관리자 데이터 파일을 생성할 수 없습니다. Administrator.txt라는 이름을 가진 파일이 현재 디렉토리에 있는지 확인해주세요.");
+				return false;
+			}
+		}
+	}
+	
+	public Boolean Check() {
+		
+	}
+	
+	
+	
+}

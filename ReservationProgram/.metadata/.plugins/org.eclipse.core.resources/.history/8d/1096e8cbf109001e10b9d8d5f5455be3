@@ -1,0 +1,319 @@
+package ReservationProgram;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+
+
+public class ReservationDataFileManager {
+	
+	public ArrayList<ReservationData> list = new ArrayList<>();
+	public static ArrayList<ReservationData> sendList = new ArrayList<>();
+	public static final int ReservationDataFile_recordSize = 9;
+	
+	public Boolean LoadDataFile(String filePath) {
+		File DataFile = new File("Reservation.txt");
+		Time sendTime;
+		String temp1, temp2, tempStr = "";
+		list.clear();
+		try {
+			Scanner scan = new Scanner(DataFile);
+			while(scan.hasNextLine()) {
+				ReservationData data = new ReservationData();
+				tempStr = scan.nextLine();
+				data.userAccountIndex = Integer.parseInt(tempStr); //사용자 인덱스
+				temp1 = scan.nextLine(); //날짜
+				temp2 = scan.nextLine(); //시간
+				sendTime = new Time(Integer.parseInt(temp1.substring(0, 4)), Integer.parseInt(temp1.substring(4, 6)), Integer.parseInt(temp1.substring(6, 8)), Integer.parseInt(temp2.substring(0, 2)), Integer.parseInt(temp2.substring(3, 5)));
+				data.time = sendTime; //Time 객체로 저장
+				data.people = Integer.parseInt(scan.nextLine()); //인원 수
+				data.tableNum = Integer.parseInt(scan.nextLine()); //좌석 번호
+				data.reservationNum = Integer.parseInt(scan.nextLine()); //예약 번호
+				data.status = scan.nextLine(); //예약 상태
+				data.restaurantIndex = Integer.parseInt(scan.nextLine());
+				try {
+					String s = scan.nextLine();
+					data.orderedMenu = StringToOrderedMenuInfo(s);
+				} catch (ParseException e) {
+					System.out.println("메뉴 고른 거 잘못됨");
+				}
+				list.add(data);
+			}
+			
+			scan.close();			
+			return true;		
+		} catch (FileNotFoundException e) {
+			try {
+				DataFile.createNewFile();
+				System.out.println("예약 데이터 파일이 생성되었습니다.");
+				return true;
+			} catch (IOException e1) { //이럴 경우가 없으므로 넘어가세요.
+				System.out.println("예약 데이터 파일을 생성할 수 없습니다. Reservationdata.txt라는 이름을 가진 파일이 현재 디렉토리에 있는지 확인해주세요.");
+				return false;
+			}
+		}
+	}
+	public Boolean AddReservation(int userAccountIndex, Time time, int people, int tableNum, int reservationNum, String status, int restaurantIndex, OrderedMenuInfo orderedMenu) {
+		File DataFile = new File("Reservation.txt");
+		try {
+//			FileWriter Writer = new FileWriter(DataFile, true); //파일 정보 끝자락에 추가하기
+			BufferedWriter Writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(DataFile, true), StandardCharsets.UTF_8));
+			String str = "";
+			str += userAccountIndex + "\r\n";
+			str += time.year + "";
+			if(time.month / 10 == 0) {
+				if(time.day / 10 == 0) {
+					str += "0" + time.month + "0" + time.day +"\r\n";
+				}else {
+					str += "0" + time.month + "" + time.day +"\r\n";
+				}
+			}else {
+				if(time.day / 10 == 0) {
+					str += "" + time.month + "0" + time.day +"\r\n";
+				}else {
+					str += "" + time.month + "" + time.day +"\r\n";
+				}
+			}
+			if(time.hour<10)
+				str += "0";
+			str+=time.hour + ":";
+			if(time.min<10)
+				str+="0";
+			str += time.min + "\r\n";
+			str += people + "\r\n";
+			str += tableNum + "\r\n";
+			str += reservationNum + "\r\n";
+			str += status + "\r\n";
+			str += restaurantIndex + "\r\n";
+			str += OrderedMenuInfoToString(orderedMenu) + "\r\n";
+			Writer.write(str);
+			Writer.flush();
+			Writer.close();
+			//System.out.println("예약 레코드 추가 성공!");
+			
+			return LoadDataFile("Reservation.txt");
+		} catch (IOException e) {
+			return false;
+		}
+	}
+	public Boolean CancelReservation(int recordIndex) {
+		boolean IndexPresence = false;
+		String tempStr = "", allStr = "";
+		File DataFile = new File("Reservation.txt");
+		try {
+			Scanner scan = new Scanner(DataFile);
+			try {
+				while(scan.hasNextLine()) {
+					allStr += scan.nextLine() + "\r\n"; //사용자 계정 인덱스
+					allStr += scan.nextLine() + "\r\n"; //날짜
+					allStr += scan.nextLine() + "\r\n"; //시간
+					allStr += scan.nextLine() + "\r\n"; //인원 수
+					allStr += scan.nextLine() + "\r\n"; //좌석 번호
+					tempStr = scan.nextLine(); //예약번호 담기
+					tempStr.replaceAll("(\r|\n|\r\n|\n\r)","");
+					System.out.println("인덱스: "+tempStr);
+					if(recordIndex == Integer.parseInt(tempStr)) { //찾는 뭉텅이 번호랑 같다면
+						IndexPresence = true;
+						allStr += tempStr + "\r\n"; //예약 번호
+						scan.nextLine();           //기존 예약 상태 건너뛰고
+						allStr += "취소\r\n";        //취소로 변경
+					}else {
+						allStr += tempStr + "\r\n";     
+						allStr += scan.nextLine()+ "\r\n"; //위 조건에 부합하지 않는 일반적인 경우 다음 인덱스 번호를 그냥 저장한다.
+					}
+					allStr += scan.nextLine()+ "\r\n";
+					allStr += scan.nextLine()+ "\r\n";
+				}
+				//System.out.println(allStr);
+//				FileWriter Writer = new FileWriter(DataFile); //파일 정보를 전부 덮어쓰기
+				BufferedWriter Writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(DataFile), StandardCharsets.UTF_8));
+				Writer.write(allStr);
+				Writer.flush();
+				Writer.close();
+				scan.close();
+				if(IndexPresence) {
+					System.out.println(recordIndex + "번 예약 취소됨");
+					return true;
+				}else {
+					System.out.println("해당 예약 번호를 가진 손님이 존재하지 않습니다.");
+					return false;
+				}
+			} catch (IOException e) {
+				System.out.println("예약 레코드 추가 실패!");
+				scan.close();
+				return false;
+			}		
+		} catch (FileNotFoundException e) {
+			System.out.println("예약 레코드 추가 실패!");
+			return false;
+		}
+	}
+	public int getNumberOfRecords() {
+		File DataFile = new File("Reservation.txt");
+		int count = 0, records = 0;
+		
+		try {
+			Scanner scan = new Scanner(DataFile);
+			while(scan.hasNextLine()) {
+				scan.nextLine();
+				count++;
+				if(count == ReservationDataFile_recordSize - 1) {
+					records++;
+					scan.nextLine();
+					count = 0;
+				}
+			}
+			scan.close();
+			return records;		
+		} catch (FileNotFoundException e) {
+			System.out.println("파일에 문제가 있는 것 같습니다.");
+			return 0;
+		}
+		
+	}
+	
+	public OrderedMenuInfo StringToOrderedMenuInfo(String str) throws ParseException{
+		String[] record = str.split("\t");
+		OrderedMenuInfo result = new OrderedMenuInfo(new int[record.length],new int[record.length]);
+		for(int i=0;i<record.length;i++) {
+			String[] menuAndAmount = record[i].split("\\s");
+			if(menuAndAmount.length!=2) {
+				throw new ParseException("RestaurantDataFileManager 객체의 StringToOrderedMenuInfo 메소드에서 오류 발생: record["+i+"]를 split한 결과의 length가 2와 일치하지 않습니다.", 0);
+			}
+			try {
+				result.menuIndex[i]=Integer.parseInt(menuAndAmount[0]);
+				result.orderedAmount[i]=Integer.parseInt(menuAndAmount[1]);
+			}
+			catch(NumberFormatException e) {
+				throw new ParseException("RestaurantDataFileManager 객체의 StringToOrderedMenuInfo 메소드에서 오류 발생: Integer.parseInt를 호출하는 과정에서 오류가 발생했습니다.", 0);
+			}
+		}
+		return result;
+	}
+	
+	public String OrderedMenuInfoToString(OrderedMenuInfo orderedMenu) {
+		if(orderedMenu.menuIndex.length == 0) {
+			return "";
+		}else if(orderedMenu.menuIndex.length == 1) {
+			return orderedMenu.menuIndex[0] + " " + orderedMenu.orderedAmount[0];
+		}else {
+			String str = orderedMenu.menuIndex[0] + " " + orderedMenu.orderedAmount[0];
+			for(int i = 1; i < orderedMenu.menuIndex.length; i++) {
+				str += "\t" + orderedMenu.menuIndex[i] + " " + orderedMenu.orderedAmount[i];
+			}
+			return str;
+		}
+	}
+	
+	public ArrayList<ReservationData> getReservationData(int recordIndex) {
+		sendList.clear();
+		for(int i = 0; i < list.size(); i++) {
+			if(recordIndex == list.get(i).userAccountIndex) {
+				ReservationData sendData = new ReservationData();
+				sendData = list.get(i);
+				sendList.add(sendData);
+			}
+		}
+		
+		return sendList;
+	}
+	
+	public boolean fetchReservationStatus(VirtualTime virtualTime) {
+		list.clear();
+		this.LoadDataFile(null);
+		
+		for(int i=0;i<list.size();i++) {
+			if(!list.get(i).status.equals("예정")){
+				continue;
+			}
+			Time t = list.get(i).time;
+			Time currentTime;
+			try {
+				currentTime = virtualTime.getTime();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+			LocalDateTime reservationDateTime = LocalDateTime.parse(t.StringDate("-")+" "+t.StringTime(), formatter);
+			LocalDateTime currentDateTime = LocalDateTime.parse(currentTime.StringDate("-")+" "+currentTime.StringTime(), formatter);
+			
+			Duration duration = Duration.between(reservationDateTime, currentDateTime);
+			if(duration.getSeconds()>=3600) {
+				list.get(i).status = "만료";
+			}
+		}
+		return this.updateDataFile();
+		
+	}
+	public boolean updateDataFile() {
+		File DataFile = new File("Reservation.txt");
+
+//		FileWriter Writer;
+		BufferedWriter Writer;
+		try {
+//			Writer = new FileWriter(DataFile);
+			Writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(DataFile), StandardCharsets.UTF_8));
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			return false;
+		}
+		String finalStr = "";
+		for(int i=0;i<this.list.size();i++) {
+			ReservationData record = this.list.get(i);
+			String str = "";
+			str += record.userAccountIndex + "\r\n";
+			str += record.time.year + "";
+			if(record.time.month / 10 == 0) {
+				if(record.time.day / 10 == 0) {
+					str += "0" + record.time.month + "0" + record.time.day +"\r\n";
+				}else {
+					str += "0" + record.time.month + "" + record.time.day +"\r\n";
+				}
+			}else {
+				if(record.time.day / 10 == 0) {
+					str += "" + record.time.month + "0" + record.time.day +"\r\n";
+				}else {
+					str += "" + record.time.month + "" + record.time.day +"\r\n";
+				}
+			}
+			if(record.time.hour<10)
+				str += "0";
+			str+=record.time.hour + ":";
+			if(record.time.min<10)
+				str+="0";
+			str += record.time.min + "\r\n";
+			str += record.people + "\r\n";
+			str += record.tableNum + "\r\n";
+			str += record.reservationNum + "\r\n";
+			str += record.status + "\r\n";
+			str += record.restaurantIndex + "\r\n";
+			str += OrderedMenuInfoToString(record.orderedMenu) + "\r\n";
+			finalStr += str;
+	}
+		
+		try {
+			Writer.write(finalStr);
+			Writer.flush();
+			Writer.close();
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			return false;
+		}
+		
+	}
+}

@@ -1,0 +1,17 @@
+package AdminProgram;
+
+public class mainstream {
+	public static AdminAccessor Aa = new AdminAccessor();
+	public static RestaurantAccessor Ra = new RestaurantAccessor();
+	
+	
+	public static void main(String[] args) {
+		while(true) {
+			
+			
+			
+			
+		}
+	}
+
+}

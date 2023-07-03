@@ -1,0 +1,84 @@
+[20230607 22:11]
+  @현재 진행상황[완성됨]
+  
+  #미완성됨
+  -ReservationAccessor.java //식당 삭제시 예약 취소를 구현하지 않으므로 현재로선 완성할 필요 없음.
+  
+  #완성됨
+  -AccountAccessor.java
+  -AccountData.java
+  -Admin.java
+  -AdminAccessor.java
+  -LoginProcess.java
+  -mainstream.java
+  -ReservationData.java
+  -RestaurantData.java
+  -RestaurantAcessor.java
+
+[20230607 21:49]
+  @현재 진행상황
+  
+  #미완성됨
+  -AccountAccessor.java
+  -ReservationAccessor.java
+  
+  #완성됨
+  -AccountData.java
+  -Admin.java
+  -AdminAccessor.java
+  -LoginProcess.java
+  -mainstream.java
+  -ReservationData.java
+  -RestaurantData.java
+  -RestaurantAcessor.java
+
+[20230607 11:38]
+  @현재 진행상황
+  
+  #미완성됨
+  -AccountAccessor.java
+  -ReservationAccessor.java
+  -RestaurantAcessor.java
+  
+  #완성됨
+  -AccountData.java
+  -Admin.java
+  -AdminAccessor.java
+  -LoginProcess.java
+  -mainstream.java
+  -ReservationData.java
+  -RestaurantData.java
+
+[20230607 10:20]
+  @현재 진행상황
+  
+  #미완성됨
+  -AccountAccessor.java
+  -AdminAccessor.java
+  -ReservationAccessor.java
+  -RestaurantAcessor.java
+  
+  #완성됨
+  -AccountData.java
+  -Admin.java
+  -LoginProcess.java
+  -mainstream.java
+  -ReservationData.java
+  -RestaurantData.java
+
+[20230607 09:35]
+  @현재 진행상황
+  
+  #미완성됨
+  -AccountAccessor.java
+  -AdminAccessor.java
+  -LoginProcess.java
+  -ReservationAccessor.java
+  -RestaurantAcessor.java
+  
+  #완성됨
+  -AccountData.java
+  -Admin.java
+  -mainstream.java
+  -ReservationData.java
+  -RestaurantData.java

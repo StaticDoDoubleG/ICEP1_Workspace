@@ -1,0 +1,14 @@
+package AdminProgram;
+
+public class mainstream {
+
+	public static void main(String[] args) {
+		while(true) {
+			
+			
+			
+			
+		}
+	}
+
+}

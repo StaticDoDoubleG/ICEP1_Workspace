@@ -1,0 +1,343 @@
+package ReservationProgram;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class AccountDataFileManager {
+	public static final int ID = 1;
+	public static final int PW = 2;
+	public static final int NAME = 3;
+	public static final int PHONENUMBER = 4;
+	public static final int VIRTUALCASH = 5;
+	public static final int POINT = 6;
+	public static final int ADF_recordSize = 6;
+	private static final String nameregex = "^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ\s]+$";
+//	private static final String moneyregex = "^[0-9]*$";
+
+	private ArrayList<AccountData> records = new ArrayList<>();
+	private String fileName;
+
+	public Boolean LoadDataFile(String filePath) {
+		this.fileName = filePath;
+		File file = new File("Account.txt");
+		try {
+			Scanner sc = new Scanner(file);
+			int recordCnt = 0;
+			String[] record = new String[ADF_recordSize];
+			while (sc.hasNextLine()) {
+				String s = sc.nextLine();
+				record[recordCnt] = s;
+				recordCnt++;
+				if (recordCnt == ADF_recordSize) {
+					if (isRight(record)) {
+						boolean add = this.AddAccountData(record[0], record[1], record[2], record[3], record[4], record[5], false);
+						recordCnt = 0;
+						if (!add) {
+							System.out.println("파일을 불러오는 중 오류가 발생하였습니다");
+							sc.close();
+							return false;
+						}
+					} else {
+						System.out.println("파일에 잘못된 정보가 존재합니다.");
+						sc.close();
+						return false;
+					}
+				}
+			}
+			sc.close();
+		} catch (FileNotFoundException e) {
+			try {
+				file.createNewFile();
+				System.out.println("파일이 존재하지 않습니다. 파일을 새로 생성합니다.");
+				return true;
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				return false;
+			}
+		}
+		// System.out.println("파일 불러오기 성공");
+		return true;
+	}
+
+	public Boolean AddAccountData(String id, String pw, String name, String phonenumber, String virtualCash, String point, boolean b) {
+		File DataFile = new File("Account.txt");
+		//string -> integer
+		int vc = Integer.parseInt(virtualCash);
+		int pt = Integer.parseInt(point);
+		AccountData data = new AccountData(id, pw, name, phonenumber, vc, pt);
+		if(!IDCheck(id)) {
+			return false;
+		}
+		//System.out.println("리코드에 더해짐");
+		records.add(data);
+		if (b == true) {
+			BufferedWriter Writer;
+//			FileWriter Writer;
+			try {
+//				Writer = new FileWriter(DataFile, true);
+				Writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(DataFile, true), StandardCharsets.UTF_8));
+				String str = "";
+				str += id + "\r\n";
+				str += pw + "\r\n";
+				str += name + "\r\n";
+				str += phonenumber + "\r\n";
+				str += virtualCash + "\r\n";
+				str += point + "\r\n";
+				Writer.write(str);
+				Writer.flush();
+				Writer.close();
+				return true;
+			} catch (IOException e) {
+				return false;
+			}
+		} else {
+			return true;
+		}
+
+	}
+	
+	public Boolean IDCheck(String id) {
+		int i = 0;
+		while(i < records.size()) {
+			if(id.compareTo(records.get(i).id) == 0) {
+				return false;
+			}
+			i++;
+		}
+		return true;
+	}
+
+	public Boolean ModifyAccountData(int userAccountIndex, int dataToModify, String data) {
+		if (userAccountIndex >= this.getNumberOfRecords()) {
+			return false;
+		}
+		switch (dataToModify) {
+		case ID:
+			if (isIDRight(data) == false)
+				return false;
+			else
+				records.get(userAccountIndex).id = data;
+			break;
+		case PW:
+			if (isPWRight(data) == false)
+				return false;
+			else
+				records.get(userAccountIndex).pw = data;
+			break;
+		case NAME:
+			if (isNameRight(data) == false)
+				return false;
+			else
+				records.get(userAccountIndex).name = data;
+			break;
+		case PHONENUMBER:
+			if (isPhoneRight(data) == false)
+				return false;
+			else
+				records.get(userAccountIndex).phonenumber = data;
+			break;
+		case VIRTUALCASH:
+			if(isCashRight(data) == false)
+				return false;
+			else {
+				int cashdata = Integer.parseInt(data);
+				records.get(userAccountIndex).virtualCash = cashdata;
+			}
+			break;
+		case POINT:
+			if(isPointRight(data) == false)
+				return false;
+			else {
+				int ptdata = Integer.parseInt(data);
+				records.get(userAccountIndex).point = ptdata;
+			}
+			break;
+		default:
+			return false;
+		}
+
+		File outputFile = new File(fileName);
+//		PrintWriter out = null;
+		BufferedWriter out = null;
+		try {
+//			out = new PrintWriter(outputFile);
+			out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputFile), StandardCharsets.UTF_8));
+			for (AccountData w : records) {
+				String str = w.id + "\r\n" + w.pw + "\r\n" + w.name + "\r\n" + w.phonenumber + "\r\n" + w.virtualCash + "\r\n" + w.point+ "\r\n" ;
+//				out.println(str);
+				out.write(str);
+			}
+			out.close();
+			System.out.println("파일이 수정되었습니다.");
+			return true;
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			return false;
+		} finally {
+				try {
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					return false;
+				}
+		}
+	}
+
+	public int getNumberOfRecords() {
+		int size = records.size();
+		return size;
+	}
+
+	public AccountData getAccountData(int userAccountIndex) {
+		return records.get(userAccountIndex);
+	}
+
+	// 문법 의미 규칙 확인
+	public boolean isRight(String[] record) {
+		String id = record[0];
+		String pw = record[1];
+		String na = record[2];
+		String pn = record[3];
+		String vc = record[4];
+		String pt = record[5];
+		if (!isIDRight(id) || !isPWRight(pw) || !isNameRight(na) || !isPhoneRight(pn) || !isCashRight(vc) || !isPointRight(pt)) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isIDRight(String id) {
+		// 길이
+		if (id.length() > 16 || id.length() < 8) {
+			return false;
+		}
+		// 공백 유무
+		if (id.equals(id.replaceAll(" ", "")) == false) {
+			return false;
+		}
+		// 아이디 문자 구성
+		for (int i = 0; i < id.length(); i++) {
+			int c = id.charAt(i);
+			if (i == 0) {
+				if (!((c >= 65 && c <= 90) || (c >= 97 && c <= 122))) {
+					return false;
+				}
+			} else if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || c == 46 || c == 95)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isPWRight(String pw) {
+		if (pw.length() > 16 || pw.length() < 8) {
+			return false;
+		}
+		// 공백
+		if (pw.equals(pw.replaceAll(" ", "")) == false) {
+			return false;
+		}
+		// 비번 문자 구성
+		for (int i = 0; i < pw.length(); i++) {
+			int c = pw.charAt(i);
+			if (!((c >= 34 && c <= 122) || c == 124 || c == 126)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean isNameRight(String na) {
+		if (na.length() < 1) {
+			return false;
+		}
+		// 이름에 특수문자
+		if (!na.matches(nameregex)) {
+			return false;
+		}
+		if (na.contains("\t") || na.contains("\n")) {
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isPhoneRight(String pn) {
+		// 규칙 1~3
+		for (int i = 0; i < pn.length(); i++) {
+			int n = pn.charAt(i);
+			if (i == 0) {
+				if (n != '0')
+					return false;
+			} else if (i == pn.length() - 1) {
+				if (!(n >= '0' && n <= '9'))
+					return false;
+			} else if (!((n >= '0' && n <= '9') || (n == '-'))) {
+				return false;
+			}
+		}
+		// 규칙 4~
+		String p = pn.replaceAll("-", "");
+
+		if (p.charAt(1) == '1' || p.charAt(1) == '7' || p.charAt(1) == '8') {
+			if (p.charAt(2) != '0')
+				return false;
+			else if (p.length() != 11)
+				return false;
+		} else if (p.charAt(1) == '2') {
+			if (p.length() != 9 && p.length() != 10)
+				return false;
+		} else {
+			if (p.length() != 10 && p.length() != 11)
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean isCashRight(String cash) {
+		if(!isInteger(cash)) {
+			return false;
+		}
+//		int temp = Integer.parseInt(cash);
+//		if(temp < 0) {
+//			return false;
+//		}
+		return true;
+	}
+
+	public boolean isPointRight(String pt){
+		if(!isInteger(pt)) {
+			return false;
+		}
+//		int temp = Integer.parseInt(pt);
+//		if(temp < 0) {
+//			return false;
+//		}
+		return true;
+	}
+
+	private boolean isInteger(String str) {
+		try {
+			int temp = Integer.parseInt(str);
+			if(temp >= 0) {
+				return true;
+			}else {
+				return false;
+			}
+		}catch(NumberFormatException e) {
+			return false;
+		}
+	}
+}

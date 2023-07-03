@@ -1,0 +1,44 @@
+package AdminProgram;
+
+import java.util.Scanner;
+
+public class mainstream {
+	public static LoginProcess log = new LoginProcess(); 
+	public static AdminAccessor Aa = new AdminAccessor();
+	public static RestaurantAccessor Ra = new RestaurantAccessor();
+	public static Scanner Input = new Scanner(System.in);
+	
+	public static void main(String[] args) {
+		int mainchoice = 0;
+		log.prompt();
+		while(true) {
+			System.out.println("[관리자 프로그램]");
+			System.out.println("\t1. 식당 목록 수정");
+			System.out.println("\t2. 계정 데이터 파일 수정");
+			System.out.println("\t3. 관리자 계정 설정");
+			System.out.println("\t4. 프로그램 종료");
+			System.out.println("수행할 작업을 선택해주세요: ");
+			String input = Input.nextLine();
+			switch(input) {
+			case "1":
+				//
+			case "2":{
+				Aa.Modify();
+				break;
+			}
+			case "3":{
+				Aa.Modify();
+				break;
+			}
+			case "4":{
+				//System.exit(0);
+				break;
+			}
+			default:
+				continue;
+			}
+			break;
+		}
+	}
+
+}

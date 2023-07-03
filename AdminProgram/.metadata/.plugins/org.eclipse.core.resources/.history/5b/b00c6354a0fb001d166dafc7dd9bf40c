@@ -1,0 +1,50 @@
+package AdminProgram;
+
+public class LoginProcess {
+	String id, pw;
+	
+	public LoginProcess() {
+		
+	}
+	
+	public int prompt() {
+		boolean accountFound = false;
+		do {
+			main.clearScreen();
+			System.out.print("[로그인] 아이디를 입력하세요 (c 입력 시 초기 화면으로 돌아가기) : ");
+			id = scanner.nextLine();
+			if (id.equals("c") || id.equals("C")) {
+				return -1;
+			}else {
+				System.out.print("[로그인] 비밀번호를 입력하세요 (c 입력 시 초기 화면으로 돌아가기) : ");
+				pw = scanner.nextLine();
+				if (pw.equals("c") || pw.equals("C")) {
+					return -1;
+				}
+			}
+			//System.out.println("OverFlow");
+			int numOfRec = accountDFM.getNumberOfRecords();
+			//System.out.println("as " + numOfRec);
+			int userIndex = -2;
+			for (int i = 0; i < numOfRec; i++) {
+				//System.out.println("as " + i);
+				AccountData accountData = accountDFM.getAccountData(i);
+				if (accountData.id.equals(id) && accountData.pw.equals(pw)) {
+					accountFound = true;
+					userIndex = i;
+					break;
+				}
+			}
+
+			if (accountFound) {
+				System.out.println("[로그인 성공]");
+				return userIndex;
+			} else {
+				System.out.println("[로그인 실패] 입력하신 아이디, 비밀번호와 일치하는 계정을 찾을 수 없습니다.\n");
+				accountFound = false;
+			}
+		} while (accountFound == false);
+		return -1;
+	}
+
+}

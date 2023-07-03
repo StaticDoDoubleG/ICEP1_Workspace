@@ -1,0 +1,158 @@
+package ReservationProgram;
+
+import java.util.Scanner;
+
+public class Registration {
+	AccountDataFileManager accData = new AccountDataFileManager();
+	Scanner scanner = new Scanner(System.in);
+	String idregex = "^[a-zA-Z0-9._]*$";
+	String pwregex = "^[a-zA-Z0-9~.!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$";
+	String nameregex = "^[a-zA-Z가-힣ㄱ-ㅎㅏ-ㅣ ]+$";
+	String phoneregex = "^0[1|7|8]0(\\d{8})$|^02(\\d{7,8})$|^0[3-6](\\d{8,9})$";
+	String idInput;
+	String passwordInput;
+	String nameInput;
+	String phoneInput;
+
+	public Registration(AccountDataFileManager accountData) {
+		this.accData = accountData;
+	}
+	public int prompt() {
+		boolean idIsRight = false;
+		boolean passwordIsRight = false;
+		boolean nameIsRight = false;
+		boolean phoneIsRight = false;
+		boolean vAccountIsRight = false;
+		boolean mileageIsRight = false;
+		do {
+			mainstream.clearScreen();
+			System.out.println("[회원가입] 아이디를 입력하세요.");
+			System.out.println("아이디는 공백 없이 8~16자리의 영문, 숫자, 특수문자(‘.’ , ‘_’)로 이루어져야 하며"
+					+ "첫 문자는 영문자로 시작해야 합니다. 아이디는 중복될 수 없습니다.");
+			System.out.println("");
+			System.out.print("(c 입력 시 초기 화면으로 돌아가기): ");
+			idInput = scanner.nextLine();
+			
+			if (idInput == null || idInput.isEmpty()) {
+				idIsRight=false;
+			} else {
+				char c = idInput.charAt(0);
+				
+				if (idInput.equals("c") || idInput.equals("C")) {
+					return -1;
+				} else if (idInput.length() < 8 || idInput.length() > 16) {
+					System.out.println("\n[오류] 아이디 규칙에 맞지 않는 입력입니다. (length)\n");
+					idIsRight=false;
+				} else if (!idInput.matches(idregex)) {
+					System.out.println("\n[오류] 아이디 규칙에 맞지 않는 입력입니다. (not allowed character or a space)\n");
+					idIsRight=false;
+				} else if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) {
+					System.out.println("\n[오류] 아이디 규칙에 맞지 않는 입력입니다. (doesnt start with a letter)\n");
+					idIsRight=false;
+				}else if(!accData.IDCheck(idInput)) {
+					System.out.println("[오류] 이미 존재하는 아이디 입니다.");
+					idIsRight=false;
+				} else {
+					idIsRight=true;
+				}
+			}
+			
+		} while (idIsRight==false);
+		
+		
+		if (idIsRight) {
+			do {
+				
+				System.out.println("[회원가입] 비밀번호를 입력하세요.");
+				System.out.println("비밀번호는 영문(대문자, 소문자 구분), 숫자, 특수문자 (~ . ! @ # $ % ^&*()_-+=[]\\|;:’”<><?/)로 "
+						+ "구성된 8자 이상 16자 이하의 문자열이어야 하며, 공백, 탭, 개행을 사용할 수 없습니다.");
+				System.out.println("연속적인 숫자나 이름, 생일, 전화번호를 사용하거나 아이디와 비슷한 비밀번호를 사용하는 것은 권고하지 않습니다.");
+				System.out.println("");
+				System.out.print("(c 입력 시 초기 화면으로 돌아가기): ");
+				passwordInput = scanner.nextLine();
+				
+				if (passwordInput.equals("c") || passwordInput.equals("C")) {
+					return -1;
+				} else if (passwordInput.length() < 8 || passwordInput.length() > 16) {
+					System.out.println("\n[오류] 비밀번호 규칙에 맞지 않는 입력입니다. (length)\n");
+					passwordIsRight=false;
+				} else if (!passwordInput.matches(pwregex)) {
+					System.out.println("\n[오류] 비밀번호 규칙에 맞지 않는 입력입니다. (not allowed character or a space)\n");
+					passwordIsRight=false;
+				} else {
+					passwordIsRight=true;
+				}
+			} while (passwordIsRight==false);
+		}
+		
+		if (passwordIsRight) {
+			do {
+				mainstream.clearScreen();
+				System.out.println("[회원가입] 이름을 입력하세요.");
+				System.out.println("이름은 1자 이상의 입력이어야 하며(탭, 개행 입력 불가능) 특수문자를 포함할 수 없습니다.");
+				System.out.println("");
+				System.out.print("(c& 입력 시 초기 화면으로 돌아가기): ");
+				nameInput = scanner.nextLine();
+				
+				if (nameInput.equals("c&") || nameInput.equals("C&")) {
+					return -1;
+				} else if (nameInput.length() < 1) {
+					System.out.println("\n[오류] 이름 규칙에 맞지 않는 입력입니다. (length)\n");
+					nameIsRight=false;
+				} else if (!nameInput.matches(nameregex)) {
+					System.out.println("\n[오류] 이름 규칙에 맞지 않는 입력입니다. (not allowed character)\n");
+					nameIsRight=false;
+				} else if (nameInput.contains("\t") || nameInput.contains("\n")) {
+					System.out.println("\n[오류] 이름 규칙에 맞지 않는 입력입니다. (space)\n");
+					nameIsRight=false;
+				}
+				else {
+					nameIsRight=true;
+				}
+			} while (nameIsRight==false);
+		}
+		
+		
+		if(nameIsRight) {
+			do {
+				
+				mainstream.clearScreen();
+				System.out.println("[회원가입] 전화번호를 입력하세요.");
+				System.out.println("전화번호 입력 규칙은 아래와 같습니다:");
+				System.out.println("\t 1. 9개 이상의 숫자와 0개 이상의 ‘-’ 문자로만 구성되어야 합니다.");
+				System.out.println("\t 2. 마지막은 숫자로 끝나야 합니다.");
+				System.out.println("\t 3. 처음 한 숫자가 0이어야 합니다.");
+				System.out.println("\t 4. 두번째 숫자가 1 또는 7 또는 8이면 ‘-’의 개수에 상관없이 그 뒤에 0과 8개의 숫자가 존재하여야 합니다.");
+				System.out.println("\t 5. 두번째 숫자가 2면 ‘-’의 개수에 상관없이 그 뒤에 7개 혹은 8개의 숫자가 존재하여야 합니다.");
+				System.out.println("\t 6. 두번째 숫자가 3 또는 4 또는 5 또는 6이면 뒤에 ‘-’의 개수에 상관없이 그 뒤에 8개 혹은 9개의 숫자가 존재하여야 합니다.");
+				System.out.println("\n입력 예시 : 010-1234-5678, 02-123-4567, 01012345678, 0-1-0-1-2-3-4-5-6-7-8 등\n");
+				System.out.print("(c 입력 시 초기 화면으로 돌아가기): "); 
+				phoneInput = scanner.nextLine();
+				phoneInput=phoneInput.replace("-", "");
+				if (phoneInput.equals("c") || phoneInput.equals("C")) {
+					return -1;
+				} else if (phoneInput.length() < 9) {
+					System.out.println("\n[오류] 전화번호 규칙에 맞지 않는 입력입니다. (length)\n");
+					phoneIsRight=false;
+				} else if (!phoneInput.matches(phoneregex)) {
+					System.out.println("\n[오류] 전화번호 규칙에 맞지 않는 입력입니다. (not allowed character)\n");
+					phoneIsRight=false;
+				} else if (phoneInput.contains(" ")) {
+					System.out.println("\n[오류] 전화번호 규칙에 맞지 않는 입력입니다. (space)\n");
+					phoneIsRight=false;
+				}
+				else {
+					phoneIsRight=true;
+				}
+			} while (phoneIsRight==false);
+		}
+		if (idIsRight && passwordIsRight && nameIsRight && phoneIsRight) {
+			accData.AddAccountData(idInput, passwordInput, nameInput, phoneInput, true);
+			System.out.println("회원가입이 완료되었습니다.");
+			
+			
+			return 0;
+		}
+		return -1;
+	}
+}
